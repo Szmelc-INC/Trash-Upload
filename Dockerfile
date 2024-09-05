@@ -13,11 +13,6 @@ RUN npm install
 # Copy the server script and any other necessary files to the working directory
 COPY . .
 
-# Create necessary directories and files with appropriate permissions
-RUN mkdir -p uploads && \
-    touch upload_log.json && \
-    chmod -R 777 uploads upload_log.json
-
 # Make port 80 available to the world outside this container
 EXPOSE 80
 
