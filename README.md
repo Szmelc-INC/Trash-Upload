@@ -1,5 +1,7 @@
 # Trash-Upload
-> Temporary file upload service (inspired by bashupload.com)
+### > Temporary file upload service (inspired by bashupload.com)
+![image](https://github.com/user-attachments/assets/c76c4c1e-b00a-4afc-b42e-73933fc840fc)
+
 
 ## Quick Setup w Docker:
 ```bash
