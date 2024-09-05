@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Simple setup script for trashupload service in docker / bash
-
+# Setup script
 clear
+
 # Display setup message
 echo "TrashUpload setup..."
 
@@ -26,6 +26,12 @@ fi
 echo "Building Docker image..."
 docker build -t trash-upload .
 
+# Check if the image was built successfully
+if [[ $? -ne 0 ]]; then
+    echo "Docker image build failed. Exiting..."
+    exit 1
+fi
+
 # Step 2: Run the Docker container with nohup to free the terminal
 echo "Running Docker container..."
 nohup docker run -d -p 80:80 --name trash-upload-container trash-upload &
@@ -33,10 +39,20 @@ nohup docker run -d -p 80:80 --name trash-upload-container trash-upload &
 # Wait a moment for the container to start
 sleep 2
 
+# Check if the container started successfully
+CONTAINER_ID=$(docker ps -q --filter "name=trash-upload-container")
+if [ -z "$CONTAINER_ID" ]; then
+    echo "Failed to start the Docker container. Please check the logs."
+    exit 1
+fi
+
 # Get the running container details
-CONTAINER_ID=$(docker ps -lq)
 IMAGE_ID=$(docker images -q trash-upload)
 CONTAINER_NAME=$(docker inspect --format='{{.Name}}' "$CONTAINER_ID" | sed 's/\///')
 
 # Display running container details
 echo "Running TrashUpload in Docker: Container Name: $CONTAINER_NAME, Container ID: $CONTAINER_ID, Image ID: $IMAGE_ID on port 80"
+
+# Optionally display the container logs
+# echo "Container logs:"
+# docker logs $CONTAINER_ID
