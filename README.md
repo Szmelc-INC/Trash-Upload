@@ -18,6 +18,10 @@ curl -F file=@/path/to/your/file http://server-ip/
 ```bash
 curl -F file=@/path/to/your/file http://server-ip/?d24=true
 ```
+Example: 
+```bash
+curl -F file=@test.jpeg szmelc.com
+```
 
 ### === Server ===
 Manage running service (server side):
