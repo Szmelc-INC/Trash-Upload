@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup script
+# Clear the screen 1
 clear
 
 # Display setup message
@@ -34,15 +34,26 @@ fi
 
 # Step 2: Run the Docker container with nohup to free the terminal
 echo "Running Docker container..."
-nohup docker run -d -p 80:80 --name trash-upload-container trash-upload &
+nohup docker run -d -p 80:80 --name trash-upload-container trash-upload > nohup.out 2>&1 &
 
 # Wait a moment for the container to start
-sleep 2
+sleep 5
 
 # Check if the container started successfully
 CONTAINER_ID=$(docker ps -q --filter "name=trash-upload-container")
 if [ -z "$CONTAINER_ID" ]; then
     echo "Failed to start the Docker container. Please check the logs."
+    
+    # Display the last few lines of nohup.out for debugging
+    echo "Displaying last 20 lines of nohup.out for debugging:"
+    tail -n 20 nohup.out
+    
+    # Display docker logs if any container started but exited
+    if docker ps -a --filter "name=trash-upload-container" --filter "status=exited" | grep "trash-upload-container"; then
+        echo "Displaying Docker container logs:"
+        docker logs trash-upload-container
+    fi
+    
     exit 1
 fi
 
