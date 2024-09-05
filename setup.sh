@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Clear the screen 1
+# Clear the screen x
 clear
 
 # Display setup message
@@ -22,7 +22,23 @@ else
     echo "Docker is already installed."
 fi
 
-# Step 1: Build the Docker image
+# Step 1: Remove any existing containers with the same name
+EXISTING_CONTAINER=$(docker ps -a -q --filter "name=trash-upload-container")
+
+if [ ! -z "$EXISTING_CONTAINER" ]; then
+    echo "Removing existing Docker container with name 'trash-upload-container'..."
+    docker rm -f $EXISTING_CONTAINER
+fi
+
+# Step 2: Remove any existing images with the same name
+EXISTING_IMAGE=$(docker images -q trash-upload)
+
+if [ ! -z "$EXISTING_IMAGE" ]; then
+    echo "Removing existing Docker image with name 'trash-upload'..."
+    docker rmi -f $EXISTING_IMAGE
+fi
+
+# Step 3: Build the Docker image
 echo "Building Docker image..."
 docker build -t trash-upload .
 
@@ -32,7 +48,7 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-# Step 2: Run the Docker container with nohup to free the terminal
+# Step 4: Run the Docker container with nohup to free the terminal
 echo "Running Docker container..."
 nohup docker run -d -p 80:80 --name trash-upload-container trash-upload > nohup.out 2>&1 &
 
@@ -63,7 +79,3 @@ CONTAINER_NAME=$(docker inspect --format='{{.Name}}' "$CONTAINER_ID" | sed 's/\/
 
 # Display running container details
 echo "Running TrashUpload in Docker: Container Name: $CONTAINER_NAME, Container ID: $CONTAINER_ID, Image ID: $IMAGE_ID on port 80"
-
-# Optionally display the container logs
-# echo "Container logs:"
-# docker logs $CONTAINER_ID
