@@ -13,8 +13,8 @@ RUN npm install
 # Copy the server script and any other necessary files to the working directory
 COPY . .
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+# Expose HTTP and HTTPS ports
+EXPOSE 80 443
 
 # Define environment variable for production
 ENV NODE_ENV=production
