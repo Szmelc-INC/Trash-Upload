@@ -5,7 +5,7 @@
 
 ## Quick Setup w Docker:
 ```bash
-git clone https://github.com/GNU-Szmelc/Trash-Upload && cd Trash-Upload && clear && bash setup.sh
+git clone https://github.com/GNU-Szmelc/Trash-Upload && cd Trash-Upload && bash setup.sh
 ```
 
 ## Usage:
