@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Clear the screen x
+# Clear the screen
 clear
 
 # Display setup message
@@ -48,9 +48,56 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-# Step 4: Run the Docker container with nohup to free the terminal
-echo "Running Docker container..."
-nohup docker run -d -p 80:80 --name trash-upload-container trash-upload > nohup.out 2>&1 &
+# Create SSL directory if it doesn't exist
+SSL_DIR="./ssl"
+if [ ! -d "$SSL_DIR" ]; then
+    echo "Creating ssl directory..."
+    mkdir -p $SSL_DIR
+fi
+
+# Ask the user if they want to manually provide SSL certificates or generate new ones
+echo "Do you want to (1) provide your own SSL certificates or (2) generate new ones using Let's Encrypt? Enter 1 or 2:"
+read -r SSL_OPTION
+
+if [ "$SSL_OPTION" == "1" ]; then
+    echo "Please place your SSL certificate (cert.pem) and private key (key.pem) in the 'ssl' directory."
+    read -p "Press Enter to continue after placing the files..."
+
+    # Check if files are present
+    if [ ! -f "$SSL_DIR/cert.pem" ] || [ ! -f "$SSL_DIR/key.pem" ]; then
+        echo "SSL files not found in the 'ssl' directory. Exiting..."
+        exit 1
+    fi
+elif [ "$SSL_OPTION" == "2" ]; then
+    echo "Generating SSL certificates using Let's Encrypt..."
+
+    # Install Certbot if not already installed
+    if ! command -v certbot &> /dev/null; then
+        echo "Certbot is not installed. Installing Certbot..."
+        sudo apt-get update
+        sudo apt-get install -y certbot
+    fi
+
+    # Prompt user for domain and email
+    read -p "Enter your domain name (e.g., example.com): " DOMAIN
+    read -p "Enter your email address for Let's Encrypt notifications: " EMAIL
+
+    # Run Certbot to generate certificates
+    sudo certbot certonly --standalone -d $DOMAIN --agree-tos -m $EMAIL
+
+    # Copy the generated certificates to the ssl directory
+    sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem $SSL_DIR/cert.pem
+    sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem $SSL_DIR/key.pem
+
+    echo "SSL certificates generated and copied to the 'ssl' directory."
+else
+    echo "Invalid option selected. Exiting..."
+    exit 1
+fi
+
+# Step 4: Run the Docker container with SSL support
+echo "Running Docker container with SSL support..."
+nohup docker run -d -p 80:80 -p 443:443 -v $(pwd)/ssl:/usr/src/app/ssl:ro --name trash-upload-container trash-upload > nohup.out 2>&1 &
 
 # Wait a moment for the container to start
 sleep 5
@@ -78,4 +125,4 @@ IMAGE_ID=$(docker images -q trash-upload)
 CONTAINER_NAME=$(docker inspect --format='{{.Name}}' "$CONTAINER_ID" | sed 's/\///')
 
 # Display running container details
-echo "Running TrashUpload in Docker: Container Name: $CONTAINER_NAME, Container ID: $CONTAINER_ID, Image ID: $IMAGE_ID on port 80"
+echo "Running TrashUpload in Docker: Container Name: $CONTAINER_NAME, Container ID: $CONTAINER_ID, Image ID: $IMAGE_ID on ports 80 and 443"
