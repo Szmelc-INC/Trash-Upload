@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- BASIC SINGLEPAGE WEB-UI FOR TRASH-UPLOAD -->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,6 +78,7 @@
             position: relative;
             left: 55%;
             bottom: 55%;
+            display: none;
         }
 
         a {
@@ -126,8 +129,10 @@
             align-items: center;
         }
 
-        .close-button,
-        .modal-copy-button {
+        .close-button {
+        	display: inline-block;
+        	
+        .modal-copy-button 
             margin-top: 8px; /* Reduced margin for compactness */
             padding: 8px 16px; /* Reduced padding for compactness */
             background-color: black;
@@ -136,7 +141,8 @@
             border-radius: 5px;
             cursor: pointer;
             text-align: center;
-            display: inline-block;
+            /*display: none;*/
+            
         }
 
         .close-button:hover,
@@ -209,9 +215,11 @@
             <h2>TrashUpload™️</h2>
             <h3>Temporary file hosting by Szmelc.INC™️</h3>
             <p>Fully Open-Source project (GPL 3.0) inspired by bashupload.com</p>
+            <p>‎ ‎ </p>
             <h2>=== Current limits: ===</h2>
             <h3>[10GB max filesize]</h3>
             <h3>[10GB per user daily]</h3>
+            <p>‎ ‎ </p>
             <p>Limits will eventually be increased after migration</p>
             <p>By default, each file is deleted after a single download</p>
             <p>Add ?d24=true at the end of URL to make file expire only after 24h</p>
@@ -227,7 +235,7 @@
             <div id="successMessage">
                 <!-- Success message and download command will be inserted here -->
             </div>
-            <button class="modal-copy-button" onclick="copyCommand()">Copy</button>
+            <!-- <button class="modal-copy-button" onclick="copyCommand()">Copy</button> -->
             <button class="close-button" onclick="closeSuccessModal()">Close</button>
         </div>
     </div>
