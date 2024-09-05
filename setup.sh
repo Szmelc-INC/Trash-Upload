@@ -6,6 +6,9 @@ clear
 # Display setup message
 echo "TrashUpload setup..."
 
+# Clean old installation
+rm -fr Trash-Upload
+
 # Check and install Docker if not installed
 if ! command -v docker &> /dev/null; then
     echo "Docker is not installed. Installing Docker..."
