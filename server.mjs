@@ -14,6 +14,7 @@ const __dirname = path.dirname(__filename);
 
 const uploadDirectory = path.join(__dirname, 'uploads');
 const logFilePath = path.join(__dirname, 'upload_log.json');
+const indexPath = path.join(__dirname, 'index.html');
 const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024; // 10 GB
 const DAILY_LIMIT = 10 * 1024 * 1024 * 1024; // 10 GB
 
@@ -40,6 +41,11 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     limits: { fileSize: MAX_FILE_SIZE }
+});
+
+// Serve the index.html file for the root GET request
+app.get('/', (req, res) => {
+    res.sendFile(indexPath);
 });
 
 const scheduleFileDeletion = (filePath, duration) => {
@@ -85,19 +91,77 @@ app.post('/', upload.single('file'), (req, res) => {
     const filePath = path.join(uploadDirectory, req.file.filename);
     const fileUrl = `${req.protocol}://${req.get('host')}/download/${req.file.filename}`;
 
-    // Check the query parameter 'd24' instead of a form field
     metadata[req.file.filename] = req.query.d24 === 'true';
 
     const downloadCommand = `wget ${fileUrl}`;
 
-    // Log the upload event to the server console
     console.log(`New upload: [${req.file.filename}] [${(fileSize / (1024 * 1024)).toFixed(2)} MB]`);
 
-    // Send plain text response to client with chalk for colored text
-    res.setHeader('Content-Type', 'text/plain');
-    res.send(`\n\n\n\n\n\n ================================================ \n\n File uploaded successfully. \n You can download it using the command:\n\n${chalk.rgb(255, 165, 0)(downloadCommand)}\n\n Thanks for choosing TrashUpload! - [Szmelc.INC]\n\n ================================================ \n\n`);
+    // Check if the client accepts HTML or plain text
+    const acceptHeader = req.headers['accept'];
+    if (acceptHeader && acceptHeader.includes('text/html')) {
+        // Send HTML response to client
+        res.setHeader('Content-Type', 'text/html');
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Upload Successful - TrashUpload</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; padding: 0; }
+                    .container { max-width: 600px; margin: auto; }
+                    h1 { color: #333; }
+                    pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
+                    .code-container { position: relative; }
+                    .copy-button { position: absolute; top: 10px; right: 10px; padding: 5px 10px; cursor: pointer; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>File Uploaded Successfully</h1>
+                    <p>You can download your file using the command below:</p>
+                    <div class="code-container">
+                        <pre id="download-command">${downloadCommand}</pre>
+                        <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+                    </div>
+                    <p>Thank you for using TrashUpload!</p>
+                    <p><a href="/">Back to Home</a></p>
+                </div>
+                <script>
+                    function copyToClipboard() {
+                        const codeBlock = document.getElementById('download-command');
+                        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                            alert('Download command copied to clipboard!');
+                        }).catch(err => {
+                            console.error('Could not copy text: ', err);
+                        });
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+    } else {
+        // Send plain text response to client with ANSI color for orange
+        const orangeANSI = '\x1b[33m'; // ANSI escape code for orange/yellow color
+        const resetANSI = '\x1b[0m';   // ANSI escape code to reset color
 
-    // Schedule file deletion after 24 hours, regardless of single download or 24-hour retention
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(`\n\n
+ ================================================ 
+
+ File uploaded successfully. 
+ You can download it using the command:
+
+ ${orangeANSI}${downloadCommand}${resetANSI}
+
+ > Thanks for using TrashUpload! \n [By Szmelc.INC]
+
+ ================================================ 
+        \n\n`);
+    }
+
     scheduleFileDeletion(filePath, 24 * 60 * 60 * 1000);
 });
 
