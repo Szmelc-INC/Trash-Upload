@@ -5,9 +5,12 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import shortid from 'shortid';
 import chalk from 'chalk';
+import http from 'http';
+import https from 'https';
 
 const app = express();
-const PORT = 80;
+const HTTP_PORT = 80;
+const HTTPS_PORT = 443;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,9 +18,20 @@ const __dirname = path.dirname(__filename);
 const uploadDirectory = path.join(__dirname, 'uploads');
 const logFilePath = path.join(__dirname, 'upload_log.json');
 const indexPath = path.join(__dirname, 'index.html');
+const sslDirectory = path.join(__dirname, 'ssl');
 const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024; // 10 GB
 const DAILY_LIMIT = 10 * 1024 * 1024 * 1024; // 10 GB
 
+// Define SSL certificate paths
+const privateKeyPath = path.join(sslDirectory, 'key.pem');
+const certificatePath = path.join(sslDirectory, 'cert.pem');
+
+// Load SSL certificates
+const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
+const certificate = fs.readFileSync(certificatePath, 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+
+// Ensure upload and log directories exist
 if (!fs.existsSync(uploadDirectory)) {
     fs.mkdirSync(uploadDirectory);
 }
@@ -182,6 +196,17 @@ app.get('/download/:filename', (req, res) => {
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
+// Create HTTP server
+const httpServer = http.createServer(app);
+
+// Create HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+// Start both servers
+httpServer.listen(HTTP_PORT, '0.0.0.0', () => {
+    console.log(`HTTP Server is running on port ${HTTP_PORT}`);
+});
+
+httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
+    console.log(`HTTPS Server is running on port ${HTTPS_PORT}`);
 });
