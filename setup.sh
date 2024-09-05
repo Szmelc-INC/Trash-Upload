@@ -1,26 +1,23 @@
 #!/bin/bash
 
-# Clear the screen
+# Clear the screen x
 clear
 
 # Display setup message
 echo "TrashUpload setup..."
 
-# Function to install Docker if not present
-install_docker() {
+# Check and install Docker if not installed
+if ! command -v docker &> /dev/null; then
     echo "Docker is not installed. Installing Docker..."
+    # Installation command for Docker based on the OS
     # For Ubuntu/Debian:
     sudo apt-get update
     sudo apt-get install -y docker.io
-    # Uncomment for CentOS/RHEL:
+    # For CentOS/RHEL:
     # sudo yum install -y docker
+    # Start Docker service after installation
     sudo systemctl start docker
     sudo systemctl enable docker
-}
-
-# Check and install Docker if not installed
-if ! command -v docker &> /dev/null; then
-    install_docker
 else
     echo "Docker is already installed."
 fi
