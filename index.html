@@ -330,7 +330,7 @@
                 const cleanText = text.replace(/\x1b\[[0-9;]*m/g, '');
 
                 // Extract wget command from response
-                const wgetCommandMatch = cleanText.match(/wget\s+(http[^\s]+)/i);
+                const wgetCommandMatch = cleanText.match(/(http[^\s]+)/i);
                 if (wgetCommandMatch) {
                     const wgetCommand = wgetCommandMatch[0];
                     showSuccessModal(wgetCommand);
