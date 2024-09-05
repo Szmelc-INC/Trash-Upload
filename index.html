@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrashUpload - Upload Service</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: #00FF00;
+            display: flex; /* Use flexbox to center content */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            height: 100vh; /* Full viewport height */
+            text-align: center;
+            overflow: hidden;
+            flex-direction: column; /* Make body column layout */
+        }
+
+        .container {
+            max-width: 300px;
+            margin: auto;
+            flex-direction: column;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1,
+        p,
+        a,
+        h3 {
+            color: #00FF00;
+            margin: 0; /* Remove default margin for compactness */
+            padding: 0.3rem 0; /* Add less padding for tighter spacing */
+            line-height: 1.2; /* Decrease line height for less spacing */
+        }
+
+        h2 {
+            color: #00FF00;
+            margin: 0;
+            padding: 0.4rem 0; /* Slightly more padding for heading */
+            line-height: 1.2; /* Decrease line height for less spacing */
+        }
+
+        pre {
+            background-color: black;
+            color: #00FF00;
+            display: block;
+            padding: 14px;
+            border: 1px solid #00FF00;
+            border-radius: 5px;
+            margin: 10px auto; /* Center and add margin */
+        }
+
+        .code-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px 0px 0px 0px; /* Reduced margin for compactness */
+        }
+
+        .copy-button {
+            margin-top: 8px; /* Add less margin for tighter spacing */
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: black;
+            color: #00FF00;
+            border: 1.5px solid #00FF00;
+            border-radius: 5px;
+            position: relative;
+            left: 55%;
+            bottom: 55%;
+        }
+
+        a {
+            color: #00FF00;
+            text-decoration: none;
+            padding: 0 15px; /* Reduced padding for compactness */
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed; /* Use fixed to cover the entire viewport */
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: auto; /* Ensure modal can scroll if content is too large */
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            border-radius: 10px;
+            padding: 20px 10px;
+            max-width: 80%;
+            max-height: 80%;
+            text-align: center;
+            overflow: auto;
+        }
+
+        #downloadCommand {
+            margin: auto;
+            text-align: center;
+            display: block;
+            align-items: center;
+        }
+
+        .close-button,
+        .modal-copy-button {
+            margin-top: 8px; /* Reduced margin for compactness */
+            padding: 8px 16px; /* Reduced padding for compactness */
+            background-color: black;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .close-button:hover,
+        .modal-copy-button:hover {
+            background-color: #00FF00;
+            color: black;
+        }
+
+        .upload-form {
+            display: inline-block;
+            margin: 8px 0; /* Reduced margin for compactness */
+            border: 1px solid #00FF00;
+            padding: 15px 10px;
+            border-radius: 10px;
+        }
+
+        .upload-button {
+            background-color: black;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 8px; /* Reduced margin for compactness */
+            align-items: center;
+        }
+
+        .upload-button:hover {
+            background-color: #00FF00;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>TrashUpload™️</h1>
+        <h4>Free Temporary File Hosting!</h4>
+        <p>‎ ‎ </p>
+        <h2> Upload via CLI: </h2>
+        <p>[Expire After Single Download]</p>
+        <div class="code-container">
+            <pre id="upload-command-single">curl -F file=@/path/to/file szmelc.com/</pre>
+            <button class="copy-button" onclick="copyToClipboard('upload-command-single')">Copy</button>
+        </div>
+        <p>[Unlimited Downloads In 24h]</p>
+        <div class="code-container">
+            <pre id="upload-command-24h">curl -F file=@/path/to/file szmelc.com/?d24=true</pre>
+            <button class="copy-button" onclick="copyToClipboard('upload-command-24h')">Copy</button>
+        </div>
+        <h2> Or: </h2>
+        <!-- New Upload Form -->
+        <div class="upload-form">
+            <h3>Upload File Directly:</h3>
+            <input type="file" id="fileInput">
+            <select id="uploadType">
+                <option value="single">Single Use</option>
+                <option value="d24">Expire after 24h</option>
+            </select>
+            <button class="upload-button" onclick="uploadFile()">Upload</button>
+        </div>
+
+        <!-- GitHub and About Links Moved to Bottom -->
+        <p><a href="https://github.com/GNU-Szmelc/Trash-Upload" target="_blank">[GitHub]</a> | <a href="#" onclick="showAbout()">[About]</a></p>
+    </div>
+
+    <!-- About Modal structure -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <h2>TrashUpload™️</h2>
+            <h3>Temporary file hosting by Szmelc.INC™️</h3>
+            <p>Fully Open-Source project (GPL 3.0) inspired by bashupload.com</p>
+            <h2>=== Current limits: ===</h2>
+            <h3>[10GB max filesize]</h3>
+            <h3>[10GB per user daily]</h3>
+            <p>Limits will eventually be increased after migration</p>
+            <p>By default, each file is deleted after a single download</p>
+            <p>Add ?d24=true at the end of URL to make file expire only after 24h</p>
+            <p>Files can also be downloaded by accessing output URL in browser</p>
+            <button class="close-button" onclick="closeAbout()">Close</button>
+        </div>
+    </div>
+
+    <!-- Success Modal structure -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <h2>Upload Successful!</h2>
+            <div id="successMessage">
+                <!-- Success message and download command will be inserted here -->
+            </div>
+            <button class="modal-copy-button" onclick="copyCommand()">Copy</button>
+            <button class="close-button" onclick="closeSuccessModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(id) {
+            const codeBlock = document.getElementById(id);
+            navigator.clipboard.writeText(codeBlock.textContent.trim()).then(() => {
+                alert('Command copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function showAbout() {
+            document.getElementById('aboutModal').style.display = 'flex';
+        }
+
+        function closeAbout() {
+            document.getElementById('aboutModal').style.display = 'none';
+        }
+
+        function showSuccessModal(command) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.innerHTML = `<pre id="downloadCommand">${command}</pre>`;
+            document.getElementById('successModal').style.display = 'flex';
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        function copyCommand() {
+            const downloadCommand = document.getElementById('downloadCommand');
+            navigator.clipboard.writeText(downloadCommand.textContent.trim()).then(() => {
+                alert('Download command copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadType = document.getElementById('uploadType').value;
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Use either localhost or domain for URL
+            let url = window.location.origin + '/';
+            if (uploadType === 'd24') {
+                url += '?d24=true';
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.text())
+            .then(text => {
+                // Strip ANSI escape codes for color
+                const cleanText = text.replace(/\x1b\[[0-9;]*m/g, '');
+
+                // Extract wget command from response
+                const wgetCommandMatch = cleanText.match(/wget\s+(http[^\s]+)/i);
+                if (wgetCommandMatch) {
+                    const wgetCommand = wgetCommandMatch[0];
+                    showSuccessModal(wgetCommand);
+                } else {
+                    showSuccessModal('File uploaded successfully! Please check your download command.');
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading file:', error);
+                alert('Error uploading file. Please try again.');
+            });
+        }
+    </script>
+</body>
+
+</html>
