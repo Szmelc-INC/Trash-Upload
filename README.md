@@ -34,5 +34,5 @@ docker stop <CONTAINER ID>
 docker start <CONTAINER ID>
 
 # Forcefully remove image
-docker rmi -f <NAME> 
+docker rmi -f trash-upload
 ```
