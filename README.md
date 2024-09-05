@@ -32,4 +32,7 @@ docker stop <CONTAINER ID>
 
 # Start container
 docker start <CONTAINER ID>
+
+# Forcefully remove image
+docker rmi -f <NAME> 
 ```
