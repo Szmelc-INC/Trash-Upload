@@ -205,12 +205,12 @@
         <h2> Upload via CLI: </h2>
         <p>[Expire After Single Download]</p>
         <div class="code-container">
-            <pre id="upload-command-single">curl -F file=@/path/to/file szmelc.com/</pre>
+            <pre id="upload-command-single">curl -T /path/to/file https://szmelc.com/</pre>
             <button class="copy-button" onclick="copyToClipboard('upload-command-single')">Copy</button>
         </div>
         <p>[Unlimited Downloads In 24h]</p>
         <div class="code-container">
-            <pre id="upload-command-24h">curl -F file=@/path/to/file szmelc.com/?d24=true</pre>
+            <pre id="upload-command-24h">curl -H "Trash-Upload-Expire: 24h" -T /path/to/file https://szmelc.com/</pre>
             <button class="copy-button" onclick="copyToClipboard('upload-command-24h')">Copy</button>
         </div>
         <h2> Or: </h2>
@@ -246,7 +246,7 @@
             <p>‎ ‎ </p>
             <p>Limits will eventually be increased after migration</p>
             <p>By default, each file is deleted after a single download</p>
-            <p>Add ?d24=true at the end of URL to make file expire only after 24h</p>
+            <p>Add ?d24=true at the end of URL or send header Trash-Upload-Expire: 24h to make file expire only after 24h</p>
             <p>Files can also be downloaded by accessing output URL in browser</p>
             <button class="close-button" onclick="closeAbout()">Close</button>
         </div>

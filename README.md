@@ -12,15 +12,21 @@ git clone https://github.com/GNU-Szmelc/Trash-Upload && cd Trash-Upload && bash 
 ### === Client ===
 > Upload file (single use only)
 ```bash
-curl -F file=@/path/to/your/file http://server-ip/
+curl -T /path/to/your/file https://server-ip/
 ```
-> Upload file (Unlimited downloads, expires after 24h) [Add ?d24=true at the end of URL]
+> Upload file (Unlimited downloads, expires after 24h)
 ```bash
-curl -F file=@/path/to/your/file http://server-ip/?d24=true
+curl -H "Trash-Upload-Expire: 24h" -T /path/to/your/file https://server-ip/
 ```
-Example: 
+> Optional: keep query style (specify filename before `?d24=true`)
 ```bash
-curl -F file=@test.jpeg szmelc.com
+filename=$(basename /path/to/your/file)
+curl -T /path/to/your/file "https://server-ip/${filename}?d24=true"
+```
+Example:
+```bash
+curl -T ./test.jpeg https://szmelc.com/
+curl -H "Trash-Upload-Expire: 24h" -T ./test.jpeg https://szmelc.com/
 ```
 
 ### === Server ===
